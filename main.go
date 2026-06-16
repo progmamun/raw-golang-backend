@@ -38,6 +38,7 @@ func main() {
 	mux.HandleFunc("GET /users", getUserHandler)
 	mux.HandleFunc("GET /users/{id}", getSingleUserHandler)
 	mux.HandleFunc("PUT /users/{id}", updateSingleUserHandler)
+	mux.HandleFunc("DELETE /users/{id}", deleteSingleUserHandler)
 
 
 	fmt.Println("Server is running at port 5000")
@@ -137,6 +138,30 @@ func updateSingleUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	
+	w.WriteHeader(http.StatusNotFound)
+	fmt.Fprintln(w, "User not found")
+}
+
+func deleteSingleUserHandler(w http.ResponseWriter, r *http.Request) {
+	idParam := r.PathValue("id")
+
+	id, err := strconv.Atoi(idParam)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Invalid user id")
+		return
+	}
+
+	for idx, user := range users{
+		if user.Id == id {
+			users = append(users[:idx], users[idx+1:] ...)
+
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+	}
+
 	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprintln(w, "User not found")
 }
